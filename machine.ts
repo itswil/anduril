@@ -42,27 +42,14 @@ const UI = {
   ADVANCED: "ADVANCED",
 } as const;
 
-const sleep = (ms: number) =>
-  new Promise((resolve) =>
-    setTimeout(
-      () =>
-        resolve({
-          status: "COMPLETED",
-        }),
-      ms
-    )
-  );
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const invokeDisplayVersion = async () => {
-  const response = await sleep(3000);
-  console.log(response);
-  return response;
+  await sleep(3000);
 };
 
 const invokeFactoryReset = async () => {
-  const response = await sleep(3000);
-  console.log(response);
-  return response;
+  await sleep(3000);
 };
 
 const andurilConfig: MachineConfig<Context, Schema, Event> = {
