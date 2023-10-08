@@ -14,11 +14,15 @@ type Schema = {
     lockoutMode: {};
     factoryReset: {};
     versionCheck: {};
+    temperatureCheck: {};
+    beaconMode: {};
+    sosMode: {};
   };
 };
 
 type Event =
   | { type: "1C" }
+  | { type: "2C" }
   | { type: "3C" }
   | { type: "3C" }
   | { type: "4C" }
@@ -31,8 +35,6 @@ const UI = {
   SIMPLE: "SIMPLE",
   ADVANCED: "ADVANCED",
 } as const;
-
-let batteryStatusInterval: number | undefined;
 
 const sleep = (ms: number) =>
   new Promise((resolve) =>
@@ -70,7 +72,7 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
           actions: ["turnLightOn"],
           target: "lightOn",
         },
-        "3C": { target: "batteryCheck" },
+        "3C": { target: "batteryCheck", cond: "isAdvancedUi" },
         "4C": { target: "lockoutMode" },
         "10C": { actions: ["setUiModeToSimple"], cond: "isAdvancedUi" },
         "10H": { actions: ["setUiModeToAdvanced"], cond: "isSimpleUi" },
@@ -90,10 +92,11 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
     },
 
     batteryCheck: {
-      entry: ["displayBatteryStatus"],
-      exit: ["cancelDisplayBatteryStatus"],
+      entry: ["enterBatteryCheck"],
+      exit: ["exitBatteryCheck"],
       on: {
         "1C": { target: "lightOff" },
+        "2C": { target: "temperatureCheck" },
       },
     },
 
@@ -121,21 +124,80 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
         onDone: "lightOff",
       },
     },
+
+    temperatureCheck: {
+      entry: ["enterTemperatureCheck"],
+      exit: ["exitTemperatureCheck"],
+      on: {
+        "2C": { target: "beaconMode" },
+      },
+    },
+
+    beaconMode: {
+      entry: ["enterBeaconMode"],
+      exit: ["exitBeaconMode"],
+      on: {
+        "2C": { target: "sosMode" },
+      },
+    },
+
+    sosMode: {
+      entry: ["enterSosMode"],
+      exit: ["exitSosMode"],
+      on: {
+        "2C": { target: "batteryCheck" },
+      },
+    },
   },
 };
 
+let intervalId: number | undefined;
+
 const andurilOptions: MachineOptions<Context, Event> = {
   actions: {
-    cancelDisplayBatteryStatus: () => {
-      clearInterval(batteryStatusInterval);
-      console.log("batteryStatusInterval cleared");
-    },
-    displayBatteryStatus: () => {
-      batteryStatusInterval = setInterval(
-        () => console.log("Your battery status is: ..."),
-        2000
+    enterBatteryCheck: () => {
+      console.log("enterBatteryCheck");
+      intervalId = setInterval(
+        () => console.log("Displaying: Battery Level"),
+        1000
       );
-      console.log("batteryStatusInterval created", batteryStatusInterval);
+    },
+    exitBatteryCheck: () => {
+      clearInterval(intervalId);
+      console.log("exitBatteryCheck");
+    },
+
+    enterTemperatureCheck: () => {
+      console.log("enterTemperatureCheck");
+      intervalId = setInterval(
+        () => console.log("Displaying: Temperature"),
+        1000
+      );
+    },
+    exitTemperatureCheck: () => {
+      clearInterval(intervalId);
+      console.log("exitTemperatureCheck");
+    },
+
+    enterBeaconMode: () => {
+      console.log("enterBeaconMode");
+      intervalId = setInterval(
+        () => console.log("Displaying: Beacon Mode"),
+        1000
+      );
+    },
+    exitBeaconMode: () => {
+      clearInterval(intervalId);
+      console.log("exitBeaconMode");
+    },
+
+    enterSosMode: () => {
+      console.log("enterSosMode");
+      intervalId = setInterval(() => console.log("Displaying: SOS Mode"), 1000);
+    },
+    exitSosMode: () => {
+      clearInterval(intervalId);
+      console.log("exitSosMode");
     },
 
     setUiModeToAdvanced: assign({ ui: UI.ADVANCED }),
