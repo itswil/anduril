@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "xstate": "^4.38.2"
+  }
+}
