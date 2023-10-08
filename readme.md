@@ -14,5 +14,5 @@ npm run dev
 
 ## Resources
 
-[Diagram](https://ivanthinking.net/images/anduril2/ui-diagram.png)
-[Manual](https://ivanthinking.net/thoughts/anduril2-manual)
+- [Diagram](https://ivanthinking.net/images/anduril2/ui-diagram.png)
+- [Manual](https://ivanthinking.net/thoughts/anduril2-manual)
