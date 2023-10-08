@@ -2,6 +2,7 @@ import type { MachineConfig, MachineOptions } from "xstate";
 import { assign, createMachine } from "xstate";
 
 type Context = {
+  brightness: number;
   ui: (typeof UI)[keyof typeof UI];
 };
 
@@ -68,6 +69,7 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
   id: "anduril",
   initial: "lightOff",
   context: {
+    brightness: 50,
     ui: UI.SIMPLE,
   },
   states: {
@@ -310,11 +312,11 @@ const andurilOptions: MachineOptions<Context, Event> = {
     setUiModeToAdvanced: assign({ ui: UI.ADVANCED }),
     setUiModeToSimple: assign({ ui: UI.SIMPLE }),
 
-    turnLightOn: () => {
-      console.log("Light is ON");
+    turnLightOn: (context) => {
+      console.log(`Light ON: ${context.brightness}%`);
     },
     turnLightOff: () => {
-      console.log("Light is OFF");
+      console.log("Light OFF");
     },
   },
 
