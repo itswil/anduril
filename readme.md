@@ -4,7 +4,7 @@
 
 Using the [XState Visualizer](https://stately.ai/viz):
 
-[State machine diagram](diagram.png)
+![State machine diagram](diagram.png)
 
 ## Setup
 
