@@ -17,6 +17,11 @@ type Schema = {
     temperatureCheck: {};
     beaconMode: {};
     sosMode: {};
+    candleMode: {};
+    bikeFlashMode: {};
+    partyStrobeMode: {};
+    tacticalStrobeMode: {};
+    lightningStormMode: {};
   };
 };
 
@@ -24,7 +29,7 @@ type Event =
   | { type: "1C" }
   | { type: "2C" }
   | { type: "3C" }
-  | { type: "3C" }
+  | { type: "3H" }
   | { type: "4C" }
   | { type: "10C" }
   | { type: "10H" }
@@ -73,6 +78,7 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
           target: "lightOn",
         },
         "3C": { target: "batteryCheck", cond: "isAdvancedUi" },
+        "3H": { target: "candleMode", cond: "isAdvancedUi" },
         "4C": { target: "lockoutMode" },
         "10C": { actions: ["setUiModeToSimple"], cond: "isAdvancedUi" },
         "10H": { actions: ["setUiModeToAdvanced"], cond: "isSimpleUi" },
@@ -88,15 +94,6 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
           target: "lightOff",
         },
         // "3H": { target: "tintRamping" },
-      },
-    },
-
-    batteryCheck: {
-      entry: ["enterBatteryCheck"],
-      exit: ["exitBatteryCheck"],
-      on: {
-        "1C": { target: "lightOff" },
-        "2C": { target: "temperatureCheck" },
       },
     },
 
@@ -125,6 +122,15 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
       },
     },
 
+    batteryCheck: {
+      entry: ["enterBatteryCheck"],
+      exit: ["exitBatteryCheck"],
+      on: {
+        "1C": { target: "lightOff" },
+        "2C": { target: "temperatureCheck" },
+      },
+    },
+
     temperatureCheck: {
       entry: ["enterTemperatureCheck"],
       exit: ["exitTemperatureCheck"],
@@ -146,6 +152,47 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
       exit: ["exitSosMode"],
       on: {
         "2C": { target: "batteryCheck" },
+      },
+    },
+
+    candleMode: {
+      entry: ["enterCandleMode"],
+      exit: ["exitCandleMode"],
+      on: {
+        "1C": { target: "lightOff" },
+        "2C": { target: "bikeFlashMode" },
+      },
+    },
+
+    bikeFlashMode: {
+      entry: ["enterBikeFlashMode"],
+      exit: ["exitBikeFlashMode"],
+      on: {
+        "2C": { target: "partyStrobeMode" },
+      },
+    },
+
+    partyStrobeMode: {
+      entry: ["enterPartyStrobeMode"],
+      exit: ["exitPartyStrobeMode"],
+      on: {
+        "2C": { target: "tacticalStrobeMode" },
+      },
+    },
+
+    tacticalStrobeMode: {
+      entry: ["enterTacticalStrobeMode"],
+      exit: ["exitTacticalStrobeMode"],
+      on: {
+        "2C": { target: "lightningStormMode" },
+      },
+    },
+
+    lightningStormMode: {
+      entry: ["LightningStormMode"],
+      exit: ["LightningStormMode"],
+      on: {
+        "2C": { target: "candleMode" },
       },
     },
   },
@@ -198,6 +245,66 @@ const andurilOptions: MachineOptions<Context, Event> = {
     exitSosMode: () => {
       clearInterval(intervalId);
       console.log("exitSosMode");
+    },
+
+    enterCandleMode: () => {
+      console.log("enterCandleMode");
+      intervalId = setInterval(
+        () => console.log("Displaying: Candle Mode"),
+        1000
+      );
+    },
+    exitCandleMode: () => {
+      clearInterval(intervalId);
+      console.log("exitCandleMode");
+    },
+
+    enterBikeFlashMode: () => {
+      console.log("enterBikeFlashMode");
+      intervalId = setInterval(
+        () => console.log("Displaying: Bike Flash Mode"),
+        1000
+      );
+    },
+    exitBikeFlashMode: () => {
+      clearInterval(intervalId);
+      console.log("exitBikeFlashMode");
+    },
+
+    enterPartyStrobeMode: () => {
+      console.log("enterPartyStrobeMode");
+      intervalId = setInterval(
+        () => console.log("Displaying: Party Strobe Mode"),
+        1000
+      );
+    },
+    exitPartyStrobeMode: () => {
+      clearInterval(intervalId);
+      console.log("exitPartyStrobeMode");
+    },
+
+    enterTacticalStrobeMode: () => {
+      console.log("enterTacticalStrobeMode");
+      intervalId = setInterval(
+        () => console.log("Displaying: Tactical Strobe Mode"),
+        1000
+      );
+    },
+    exitTacticalStrobeMode: () => {
+      clearInterval(intervalId);
+      console.log("exitTacticalStrobeMode");
+    },
+
+    enterLightningStrobeMode: () => {
+      console.log("enterLightningStrobeMode");
+      intervalId = setInterval(
+        () => console.log("Displaying: Lightning Strobe Mode"),
+        1000
+      );
+    },
+    exitLightningStrobeMode: () => {
+      clearInterval(intervalId);
+      console.log("exitLightningStrobeMode");
     },
 
     setUiModeToAdvanced: assign({ ui: UI.ADVANCED }),
