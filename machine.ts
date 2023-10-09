@@ -89,13 +89,10 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
           actions: ["turnLightOff"],
           target: "lightOff",
         },
-        "2C": {
-          actions: ["setBrightnessMax"],
-        },
-        "2H": {
-          actions: ["setBrightnessMin"],
-        },
+        "2C": { actions: ["setBrightnessMax"] },
+        "2H": { actions: ["setBrightnessMin"] },
         // "3H": { target: "tintRamping" },
+        "4C": { target: "lockoutMode" },
       },
     },
 
