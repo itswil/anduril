@@ -2,7 +2,7 @@ import type { MachineConfig, MachineOptions } from "xstate";
 import { assign, createMachine } from "xstate";
 
 type Context = {
-  brightness: number;
+  brightness: (typeof BRIGHTNESS)[keyof typeof BRIGHTNESS];
   ui: (typeof UI)[keyof typeof UI];
 };
 
@@ -29,6 +29,7 @@ type Schema = {
 type Event =
   | { type: "1C" }
   | { type: "2C" }
+  | { type: "2H" }
   | { type: "3C" }
   | { type: "3H" }
   | { type: "4C" }
@@ -41,6 +42,12 @@ const UI = {
   SIMPLE: "SIMPLE",
   ADVANCED: "ADVANCED",
 } as const;
+
+const BRIGHTNESS = {
+  DEFAULT: 50,
+  MAX: 100,
+  MIN: 10,
+};
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -56,7 +63,7 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
   id: "anduril",
   initial: "lightOff",
   context: {
-    brightness: 50,
+    brightness: BRIGHTNESS.DEFAULT,
     ui: UI.SIMPLE,
   },
   states: {
@@ -81,6 +88,12 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
         "1C": {
           actions: ["turnLightOff"],
           target: "lightOff",
+        },
+        "2C": {
+          actions: ["setBrightnessMax"],
+        },
+        "2H": {
+          actions: ["setBrightnessMin"],
         },
         // "3H": { target: "tintRamping" },
       },
@@ -295,6 +308,9 @@ const andurilOptions: MachineOptions<Context, Event> = {
       clearInterval(intervalId);
       console.log("exitLightningStrobeMode");
     },
+
+    setBrightnessMax: assign({ brightness: BRIGHTNESS.MAX }),
+    setBrightnessMin: assign({ brightness: BRIGHTNESS.MIN }),
 
     setUiModeToAdvanced: assign({ ui: UI.ADVANCED }),
     setUiModeToSimple: assign({ ui: UI.SIMPLE }),
