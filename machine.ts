@@ -3,6 +3,7 @@ import { assign, createMachine } from "xstate";
 
 type Context = {
   brightness: (typeof BRIGHTNESS)[keyof typeof BRIGHTNESS];
+  lastStrobeMode: (typeof STROBE_MODE)[keyof typeof STROBE_MODE];
   ui: (typeof UI)[keyof typeof UI];
 };
 
@@ -18,11 +19,12 @@ type Schema = {
     temperatureCheck: {};
     beaconMode: {};
     sosMode: {};
-    candleMode: {};
-    bikeFlashMode: {};
-    partyStrobeMode: {};
-    tacticalStrobeMode: {};
-    lightningStormMode: {};
+    strobeModeEntryPoint: {};
+    [STROBE_MODE.CANDLE]: {};
+    [STROBE_MODE.BIKE_FLASH]: {};
+    [STROBE_MODE.PARTY]: {};
+    [STROBE_MODE.TACTICAL]: {};
+    [STROBE_MODE.LIGHTNING]: {};
   };
 };
 
@@ -50,6 +52,14 @@ const BRIGHTNESS = {
   MIN: 10,
 };
 
+const STROBE_MODE = {
+  CANDLE: "candleMode",
+  BIKE_FLASH: "bikeFlashMode",
+  PARTY: "partyStrobeMode",
+  TACTICAL: "tacticalStrobeMode",
+  LIGHTNING: "lightningStrobeMode",
+} as const;
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const invokeDisplayVersion = async () => {
@@ -65,18 +75,16 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
   initial: "lightOff",
   context: {
     brightness: BRIGHTNESS.DEFAULT,
+    lastStrobeMode: STROBE_MODE.CANDLE,
     ui: UI.SIMPLE,
   },
   states: {
     lightOff: {
       entry: ["turnLightOff"],
       on: {
-        "1C": {
-          actions: ["turnLightOn"],
-          target: "lightOn",
-        },
+        "1C": { target: "lightOn" },
         "3C": { target: "batteryCheck", cond: "isAdvancedUi" },
-        "3H": { target: "candleMode", cond: "isAdvancedUi" },
+        "3H": { target: "strobeModeEntryPoint", cond: "isAdvancedUi" },
         "4C": { target: "lockoutMode" },
         "10C": { actions: ["setUiModeToSimple"], cond: "isAdvancedUi" },
         "10H": { actions: ["setUiModeToAdvanced"], cond: "isSimpleUi" },
@@ -92,7 +100,7 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
         "1H": { actions: ["increaseBrightness"] },
         "2C": { actions: ["setBrightnessMax"] },
         "2H": { actions: ["decreaseBrightness"] },
-        // "3H": { target: "tintRamping" },
+        "3H": { target: "tintRamping" },
         "4C": { target: "lockoutMode" },
       },
     },
@@ -155,7 +163,14 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
       },
     },
 
-    candleMode: {
+    strobeModeEntryPoint: {
+      always: Object.values(STROBE_MODE).map((mode) => ({
+        cond: (context) => context.lastStrobeMode === mode,
+        target: mode,
+      })),
+    },
+
+    [STROBE_MODE.CANDLE]: {
       entry: ["enterCandleMode"],
       exit: ["exitCandleMode"],
       on: {
@@ -164,34 +179,38 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
       },
     },
 
-    bikeFlashMode: {
+    [STROBE_MODE.BIKE_FLASH]: {
       entry: ["enterBikeFlashMode"],
       exit: ["exitBikeFlashMode"],
       on: {
+        "1C": { target: "lightOff" },
         "2C": { target: "partyStrobeMode" },
       },
     },
 
-    partyStrobeMode: {
+    [STROBE_MODE.PARTY]: {
       entry: ["enterPartyStrobeMode"],
       exit: ["exitPartyStrobeMode"],
       on: {
+        "1C": { target: "lightOff" },
         "2C": { target: "tacticalStrobeMode" },
       },
     },
 
-    tacticalStrobeMode: {
+    [STROBE_MODE.TACTICAL]: {
       entry: ["enterTacticalStrobeMode"],
       exit: ["exitTacticalStrobeMode"],
       on: {
-        "2C": { target: "lightningStormMode" },
+        "1C": { target: "lightOff" },
+        "2C": { target: "lightningStrobeMode" },
       },
     },
 
-    lightningStormMode: {
-      entry: ["LightningStormMode"],
-      exit: ["LightningStormMode"],
+    [STROBE_MODE.LIGHTNING]: {
+      entry: ["LightningStrobeMode"],
+      exit: ["LightningStrobeMode"],
       on: {
+        "1C": { target: "lightOff" },
         "2C": { target: "candleMode" },
       },
     },
@@ -247,65 +266,11 @@ const andurilOptions: MachineOptions<Context, Event> = {
       console.log("exitSosMode");
     },
 
-    enterCandleMode: () => {
-      console.log("enterCandleMode");
-      intervalId = setInterval(
-        () => console.log("Displaying: Candle Mode"),
-        1000
-      );
-    },
-    exitCandleMode: () => {
-      clearInterval(intervalId);
-      console.log("exitCandleMode");
-    },
-
-    enterBikeFlashMode: () => {
-      console.log("enterBikeFlashMode");
-      intervalId = setInterval(
-        () => console.log("Displaying: Bike Flash Mode"),
-        1000
-      );
-    },
-    exitBikeFlashMode: () => {
-      clearInterval(intervalId);
-      console.log("exitBikeFlashMode");
-    },
-
-    enterPartyStrobeMode: () => {
-      console.log("enterPartyStrobeMode");
-      intervalId = setInterval(
-        () => console.log("Displaying: Party Strobe Mode"),
-        1000
-      );
-    },
-    exitPartyStrobeMode: () => {
-      clearInterval(intervalId);
-      console.log("exitPartyStrobeMode");
-    },
-
-    enterTacticalStrobeMode: () => {
-      console.log("enterTacticalStrobeMode");
-      intervalId = setInterval(
-        () => console.log("Displaying: Tactical Strobe Mode"),
-        1000
-      );
-    },
-    exitTacticalStrobeMode: () => {
-      clearInterval(intervalId);
-      console.log("exitTacticalStrobeMode");
-    },
-
-    enterLightningStrobeMode: () => {
-      console.log("enterLightningStrobeMode");
-      intervalId = setInterval(
-        () => console.log("Displaying: Lightning Strobe Mode"),
-        1000
-      );
-    },
-    exitLightningStrobeMode: () => {
-      clearInterval(intervalId);
-      console.log("exitLightningStrobeMode");
-    },
+    enterBikeFlashMode: assign({ lastStrobeMode: STROBE_MODE.BIKE_FLASH }),
+    enterCandleMode: assign({ lastStrobeMode: STROBE_MODE.CANDLE }),
+    enterPartyStrobeMode: assign({ lastStrobeMode: STROBE_MODE.PARTY }),
+    enterTacticalStrobeMode: assign({ lastStrobeMode: STROBE_MODE.TACTICAL }),
+    enterLightningStrobeMode: assign({ lastStrobeMode: STROBE_MODE.LIGHTNING }),
 
     decreaseBrightness: assign({
       brightness: (context) => context.brightness - 1,
