@@ -94,7 +94,7 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
     },
 
     lightOn: {
-      entry: ["turnLightOff"],
+      entry: ["turnLightOn"],
       on: {
         "1C": { target: "lightOff" },
         "1H": { actions: ["increaseBrightness"] },
