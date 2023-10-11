@@ -6,12 +6,6 @@ Using the [XState Visualizer](https://stately.ai/viz):
 
 ![State machine diagram](diagram.png)
 
-## Setup
-
-```
-npm run dev
-```
-
 ## Resources
 
 - [Reddit: Andúril 2 UI Chart](https://www.reddit.com/r/flashlight/comments/sk1upj/and%C3%BAril_2_ui_chart/)
