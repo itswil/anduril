@@ -28,6 +28,7 @@ type Schema = {
 
 type Event =
   | { type: "1C" }
+  | { type: "1H" }
   | { type: "2C" }
   | { type: "2H" }
   | { type: "3C" }
@@ -68,6 +69,7 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
   },
   states: {
     lightOff: {
+      entry: ["turnLightOff"],
       on: {
         "1C": {
           actions: ["turnLightOn"],
@@ -84,13 +86,12 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
     },
 
     lightOn: {
+      entry: ["turnLightOff"],
       on: {
-        "1C": {
-          actions: ["turnLightOff"],
-          target: "lightOff",
-        },
+        "1C": { target: "lightOff" },
+        "1H": { actions: ["increaseBrightness"] },
         "2C": { actions: ["setBrightnessMax"] },
-        "2H": { actions: ["setBrightnessMin"] },
+        "2H": { actions: ["decreaseBrightness"] },
         // "3H": { target: "tintRamping" },
         "4C": { target: "lockoutMode" },
       },
@@ -305,6 +306,13 @@ const andurilOptions: MachineOptions<Context, Event> = {
       clearInterval(intervalId);
       console.log("exitLightningStrobeMode");
     },
+
+    decreaseBrightness: assign({
+      brightness: (context) => context.brightness - 1,
+    }),
+    increaseBrightness: assign({
+      brightness: (context) => context.brightness + 1,
+    }),
 
     setBrightnessMax: assign({ brightness: BRIGHTNESS.MAX }),
     setBrightnessMin: assign({ brightness: BRIGHTNESS.MIN }),
