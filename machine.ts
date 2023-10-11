@@ -83,6 +83,8 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
       entry: ["turnLightOff"],
       on: {
         "1C": { target: "lightOn" },
+        "1H": { actions: ["setBrightnessMin"], target: "lightOn" },
+        "2C": { actions: ["setBrightnessMax"], target: "lightOn" },
         "3C": { target: "batteryCheck", cond: "isAdvancedUi" },
         "3H": { target: "strobeModeEntryPoint", cond: "isAdvancedUi" },
         "4C": { target: "lockoutMode" },
