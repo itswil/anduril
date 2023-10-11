@@ -174,7 +174,6 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
 
     [STROBE_MODE.CANDLE]: {
       entry: ["enterCandleMode"],
-      exit: ["exitCandleMode"],
       on: {
         "1C": { target: "lightOff" },
         "2C": { target: "bikeFlashMode" },
@@ -183,7 +182,6 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
 
     [STROBE_MODE.BIKE_FLASH]: {
       entry: ["enterBikeFlashMode"],
-      exit: ["exitBikeFlashMode"],
       on: {
         "1C": { target: "lightOff" },
         "2C": { target: "partyStrobeMode" },
@@ -192,7 +190,6 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
 
     [STROBE_MODE.PARTY]: {
       entry: ["enterPartyStrobeMode"],
-      exit: ["exitPartyStrobeMode"],
       on: {
         "1C": { target: "lightOff" },
         "2C": { target: "tacticalStrobeMode" },
@@ -201,7 +198,6 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
 
     [STROBE_MODE.TACTICAL]: {
       entry: ["enterTacticalStrobeMode"],
-      exit: ["exitTacticalStrobeMode"],
       on: {
         "1C": { target: "lightOff" },
         "2C": { target: "lightningStrobeMode" },
@@ -210,7 +206,6 @@ const andurilConfig: MachineConfig<Context, Schema, Event> = {
 
     [STROBE_MODE.LIGHTNING]: {
       entry: ["LightningStrobeMode"],
-      exit: ["LightningStrobeMode"],
       on: {
         "1C": { target: "lightOff" },
         "2C": { target: "candleMode" },
